@@ -1,0 +1,788 @@
+---
+title: "Predictive Modeling Take Home Exam"
+author: "Sujay Chebbi"
+date: "08/02/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Exam questions
+
+## Chapter 2 - 10
+
+### Chapter 2 - 10a
+
+```{r}
+rm(list = ls())
+library(MASS)
+Boston
+?Boston
+```
+There are 506 rows and 14 columns in the Boston data set. The columns represent various attributes about housing in Boston, ranging from crime rate to all the way to the actual values of those homes. The rows represent suburbs in Boston and the corresponding values of the 14 features.
+
+### Chapter 2 - 10b
+
+```{r}
+pairs(Boston)
+```
+The scatter plots display the relationships of the 14 variables with respect to each other. Many of the factors with respect to each other do not seem to have any discernible relationship.However there is a negative relationship with medv and lstat and a rather negative logarithmic relationship between dis and nox. One positive relationship looks to be between medv and rm.
+
+### Chapter 2 - 10c
+
+```{r}
+par(mfrow = c(2,7))
+
+plot(Boston$zn, Boston$crim)
+plot(Boston$indus, Boston$crim)
+plot(Boston$chas, Boston$crim)
+plot(Boston$nox, Boston$crim)
+plot(Boston$rm, Boston$crim)
+plot(Boston$age, Boston$crim)
+plot(Boston$dis, Boston$crim)
+plot(Boston$rad, Boston$crim)
+plot(Boston$tax, Boston$crim)
+plot(Boston$ptratio, Boston$crim)
+plot(Boston$black, Boston$crim)
+plot(Boston$lstat, Boston$crim)
+plot(Boston$medv, Boston$crim)
+```
+It seems that close by to the employment centres there is a high crime rate, while farther away, the crime capita rate goes down. The lower median values of houses also have higher crime rates than those houses with higher median values. With higher proportion of owners living in units built prior to 1940, the crime rate also seems to increase. Areas with large concentration of residential lots greater than 25,000 sq ft have lower crime rates. Where the tract bounds the Charles River, crime rate is low, otherwise it seems to be higher. A pupil-teacher ratio of approximately 20% shows a crime rate that is significantly larger.
+
+### Chapter 2 - 10d
+
+```{r}
+summary(Boston$crim)
+
+par(mfrow = c(1,1))
+
+hist(Boston$crim, 100)
+
+range(Boston$crim)
+
+nrow(Boston[Boston$crim > 20,])
+
+hist(Boston$tax, 100)
+
+range(Boston$tax)
+
+nrow(Boston[Boston$tax > 400,])
+
+hist(Boston$ptratio, 100)
+
+range(Boston$ptratio)
+
+nrow(Boston[Boston$ptratio == 20.2,])
+
+par(mfrow = c(2,1))
+
+plot(Boston$tax, Boston$crim)
+plot(Boston$ptratio, Boston$crim)
+```
+Certain area with a specific tax rate of approximately 670 seem to have a much higher crime rate than the rest of town.This could also be because, according to the histogram, the most frequency of suburbs have a tax rate of approximately 670. The crime rate for a ptratio of 20.2 is also disproportionately higher than the rest of town, but that might also be because a ptratio of 20.2 also corresponds to the highest frequency in Boston. The frequency of "high" crime rate, that is greater than 20, is relatively small being only 18. A reason why large crime rates show up for ptratio of 20.2 and a tax rate for 670 might be because those frequencies are much higher than the rest, and would show more variation.
+
+### Chapter 2 - 10e
+
+```{r}
+summary(Boston$chas)
+
+nrow(Boston[Boston$chas == 0,])
+
+nrow(Boston[Boston$chas == 1,])
+```
+Only 35 suburbs in this data set bound the Charles River.
+
+### Chapter 2 - 10f
+
+```{r}
+summary(Boston$ptratio)
+```
+The median pupil-teacher ratio among the data set is 19.05.
+
+### Chapter 2 - 10g
+
+```{r}
+summary(Boston)
+
+lowest_median_value <- Boston[Boston$medv == min(Boston$medv),]
+
+t(lowest_median_value)
+
+range(Boston$crim)
+median(Boston$crim)
+range(Boston$age)
+median(Boston$age)
+range(Boston$ptratio)
+median(Boston$ptratio)
+range(Boston$lstat)
+median(Boston$lstat)
+```
+There are two suburbs with the lowest median value of owner-occupied homes. The median value of these homes is $5,000.The corresponding crime rates are 38.3518 and 67.9208. The proportion of units that are built before 1940 for both suburbs is 100%. The pupil-teacher ratio for both suburbs is 20.2. The lower status of the population for the first suburb is 30.59%, and for the other, it is 22.98%. Suburbs with low median house values will tend to have higher crime rates, older houses, and higher percentage of the lower status of the population.
+
+### Chapter 2 - 10h
+
+```{r}
+summary(Boston$rm)
+
+nrow(Boston[Boston$rm > 7,])
+nrow(Boston[Boston$rm > 8,])
+
+dwellings_more_than_eight <- Boston[Boston$rm > 8,]
+
+dwellings_more_than_eight
+
+median(dwellings_more_than_eight$crim)
+median(dwellings_more_than_eight$medv)
+median(dwellings_more_than_eight$lstat)
+median(dwellings_more_than_eight$age)
+```
+There are 64 suburbs averaging more than 7 rooms per dwelling and 13 suburbs averaging more than 8 rooms per dwelling. The median crime rate is 0.7187954, the median home value is $48,300, the median lower status of the population is 4.14% and the median proportion of houses older than 1940 is 78.3%. It seems that suburbs that average more than 8 rooms per dwelling tend to have higher home values, lower crime rates, and lower proportion of lower status of the population.
+
+
+## Chapter 3 - 15
+
+### Chapter 3 - 15a
+
+```{r}
+rm(list = ls())
+
+library(MASS)
+
+names(Boston)
+
+crim.zn = lm(crim~zn, data = Boston)
+crim.indus = lm(crim~indus, data = Boston)
+crim.chas = lm(crim~chas, data = Boston)
+crim.nox = lm(crim~nox, data = Boston)
+crim.rm = lm(crim~rm, data = Boston)
+crim.age = lm(crim~age, data = Boston)
+crim.dis = lm(crim~dis, data = Boston)
+crim.rad = lm(crim~rad, data = Boston)
+crim.tax = lm(crim~tax, data = Boston)
+crim.ptratio = lm(crim~ptratio, data = Boston)
+crim.black = lm(crim~black, data = Boston)
+crim.lstat = lm(crim~lstat, data = Boston)
+crim.medv = lm(crim~medv, data = Boston)
+
+summary(crim.zn)
+summary(crim.indus)
+summary(crim.chas)
+summary(crim.nox)
+summary(crim.rm)
+summary(crim.age)
+summary(crim.dis)
+summary(crim.rad)
+summary(crim.tax)
+summary(crim.ptratio)
+summary(crim.black)
+summary(crim.lstat)
+summary(crim.medv)
+
+par(mfrow = c(2,2))
+
+plot(crim.tax)
+plot(crim.chas)
+```
+All of the linear models show statistical significance between crime and the corresponding x variable, except for crime and chas. The p-value for chas with respect to crim was 0.209. For all of the other plots, the p-values were statistically significant.
+
+### Chapter 3 - 15b
+
+```{r}
+crim.all = lm(crim~., data = Boston)
+
+summary(crim.all)
+
+plot(crim.all)
+```
+Rejecting the null hypothesis is reserved for the predictors which exhibit statistical significance. Those predictors must have p-values less than 0.05. We can reject the null hypothesis for zn, dis, rad, black, and medv.
+
+### Chapter 3 - 15c
+
+```{r}
+univariate_coefs <- c(coef(crim.zn)[2], coef(crim.indus)[2], coef(crim.chas)[2], coef(crim.nox)[2], coef(crim.rm)[2],
+                      coef(crim.age)[2], coef(crim.dis)[2], coef(crim.rad)[2], coef(crim.tax)[2], coef(crim.ptratio)[2],
+                      coef(crim.black)[2], coef(crim.lstat)[2], coef(crim.medv)[2])
+univariate_coefs
+
+multivariate_coefs <- coef(crim.all)[2:14]
+multivariate_coefs
+
+par(mfrow = c(1,1))
+
+plot(univariate_coefs, multivariate_coefs)
+```
+The results from part a vary with those from part b. For example, the univariate coefficient for rad is 0.6179, while the multivariate coefficient for rad is 0.5882. This doesn't show much difference. However the univariate coefficient for nox shows a positive correlation of 31.2485, while the multivariate coefficient for nox is -10.3135. This shows a large amount of difference. It implies that nox is correlated positively with crim when used as a single predictor, but when combined with more attributes, the contribution of nox becomes a huge negative correlation.
+
+### Chapter 3 - 15d
+
+```{r}
+crim.zn2 = lm(crim~poly(zn,3), data = Boston)
+crim.indus2 = lm(crim~poly(indus,3), data = Boston)
+crim.nox2 = lm(crim~poly(nox,3), data = Boston)
+crim.rm2 = lm(crim~poly(rm,3), data = Boston)
+crim.age2 = lm(crim~poly(age,3), data = Boston)
+crim.dis2 = lm(crim~poly(dis,3), data = Boston)
+crim.rad2 = lm(crim~poly(rad,3), data = Boston)
+crim.tax2 = lm(crim~poly(tax,3), data = Boston)
+crim.ptratio2 = lm(crim~poly(ptratio,3), data = Boston)
+crim.black2 = lm(crim~poly(black,3), data = Boston)
+crim.lstat2 = lm(crim~poly(lstat,3), data = Boston)
+crim.medv2 = lm(crim~poly(medv,3), data = Boston)
+
+summary(crim.zn2)
+summary(crim.indus2)
+summary(crim.nox2)
+summary(crim.rm2)
+summary(crim.age2)
+summary(crim.dis2)
+summary(crim.rad2)
+summary(crim.tax2)
+summary(crim.ptratio2)
+summary(crim.black2)
+summary(crim.lstat2)
+summary(crim.medv2)
+```
+The cubic coefficient for zn, rm, rad, tax, black, and lstat are not significant. It was not possible to find a polynomial regression between crim and chas because there were only 2 unique values for chas: 0 and 1. The only quadratic coefficient which did not show significance was for black. Therefore the relationship between crim and black can only be explained somewhat by a linear regression. Many of these variables can be explained by a cubic or quadratic equation, but that might be due to over-fitting and not necessarily indicative of a real pattern.
+
+
+## Chapter 4 - 10
+
+### Chapter 4 - 10a
+
+```{r}
+rm(list = ls())
+library(ISLR)
+
+summary(Weekly)
+
+pairs(Weekly)
+
+cor(Weekly[,-9])
+```
+There appears to be a non-linear positive relationship between Year and Volume.The correlation between the other variables looks to be small and not discernible.
+
+### Chapter 4 - 10b
+
+```{r}
+attach(Weekly)
+
+glm.fit = glm(Direction~Lag1+Lag2+Lag3+Lag4+Lag5+Volume, data=Weekly, family=binomial)
+
+summary(glm.fit)
+```
+The only predictor that appears to be statistically significant is the Lag2 variable with a p-value of 0.0296.
+
+### Chapter 4 - 10c
+
+```{r}
+glm.probs = predict(glm.fit, type = 'response')
+contrasts(Direction)
+glm.pred = rep("Down", length(glm.probs))
+glm.pred[glm.probs > 0.5] = "Up"
+
+table(glm.pred, Direction)
+
+mean(glm.pred == Direction)
+
+down_correct <- 54 / (54 + 430)
+down_correct
+
+up_correct <- 557 / (557 + 48)
+up_correct
+```
+Fraction of correct prediction is (54 + 557) / 1089 which equals 0.561. When the logistic regression is trying to predict when the market is up, it is correct 92% of the time. When the logistic regression is trying to predict when the market is down, it is correct only 11% of the time.
+
+### Chapter 4 - 10d
+
+```{r}
+train = (Year < 2009)
+glm.fit2 = glm(Direction~Lag2, data = Weekly, family = binomial, subset = train)
+test = Weekly[!train,]
+glm.probs2 = predict(glm.fit2, test, type = 'response')
+glm.pred2 = rep("Down", length(glm.probs2))
+glm.pred2[glm.probs2 > 0.5] = "Up"
+Direction.test = Direction[!train]
+
+table(glm.pred2, Direction.test)
+
+mean(glm.pred2 == Direction.test)
+```
+The overall fraction of correct predictions on the test data set is 0.625 or 62.5%.
+
+### Chapter 4 - 10g
+
+```{r}
+library(class)
+train.X = matrix((Lag2)[train])
+test.X = matrix((Lag2)[!train])
+train.Direction = Direction[train]
+
+set.seed(1)
+knn.pred = knn(train.X, test.X, train.Direction, k = 1)
+
+table(knn.pred, Direction.test)
+
+mean(knn.pred == Direction.test)
+```
+The overall fraction of correct predictions on the test data set is 0.5 or 50%.
+
+### Chapter 4 - 10h
+
+The logistic regression appears to provide the best predictions because it correctly predicted 62.5% on the test data set, while the KNN method only predicted 50% on the test data set.
+
+### Chapter 4 - 10i
+
+```{r}
+glm.fit3 = glm(Direction~Lag3 + Lag4 + Lag5, data = Weekly, family = binomial, subset = train)
+glm.probs3 = predict(glm.fit3, test, type = 'response')
+glm.pred3 = rep("Down", length(glm.probs3))
+glm.pred3[glm.probs3 > 0.5] = "Up"
+
+table(glm.pred3, Direction.test)
+
+mean(glm.pred3 == Direction.test)
+
+set.seed(1)
+knn.pred2 = knn(train.X, test.X, train.Direction, k = 20)
+
+table(knn.pred2, Direction.test)
+
+mean(knn.pred2 == Direction.test)
+
+set.seed(1)
+knn.pred3 = knn(train.X, test.X, train.Direction, k = 100)
+
+table(knn.pred3, Direction.test)
+
+mean(knn.pred3 == Direction.test)
+
+glm.fit4 = glm(Direction~Lag1 + Lag2 + Lag3 + Lag4 + Lag5, data = Weekly, family = binomial, subset = train)
+glm.probs4 = predict(glm.fit4, test, type = 'response')
+glm.pred4 = rep("Down", length(glm.probs4))
+glm.pred4[glm.probs4 > 0.5] = "Up"
+
+table(glm.pred4, Direction.test)
+
+mean(glm.pred4 == Direction.test)
+```
+Logistic regression with Lag3, Lag4, and Lag5 as predictors yields a correct prediction rate of 55.8%.
+KNN method with k = 20 yields a correct prediction rate of 56.65%.
+KNN method with k = 100 yields a correct prediction rate of 57.7%.
+Logistic regression with all Lag variables as predictors yields a correct prediction rate of 54.8%. The original logistic regression with Lag2 as the only predictor yielded the best prediction rate.
+
+
+## Chapter 6 - 9
+
+### Chapter 6 - 9a
+
+```{r}
+rm(list = ls())
+library(ISLR)
+
+set.seed(1)
+train = sample(c(TRUE, FALSE), nrow(College), rep=TRUE)
+test=(!train)
+College_train = College[train,]
+College_test = College[-train,]
+```
+
+### Chapter 6 - 9b
+
+```{r}
+colnames(College)
+set.seed(1)
+
+lm.fit = lm(Apps~., data = College_train)
+lm.pred = predict(lm.fit, College_test)
+
+Mean_squares <- mean((lm.pred - College_test$Apps)^2)
+
+RMSE_apps <- sqrt(Mean_squares)
+
+RMSE_apps
+```
+RMSE of the least squares model on the training set is 1050.898.
+
+### Chapter 6 - 9c
+
+```{r}
+library(glmnet)
+set.seed(1)
+
+grid = 10 ^ seq(10, -2, length = 100)
+x_train = model.matrix(Apps~., College_train)[,-1]
+x_test = model.matrix(Apps~., College_test)[,-1]
+y_train = College$Apps[train]
+y_test = College$Apps[-train]
+ridge.mod = cv.glmnet(x_train, y_train, alpha = 0)
+lambda_min <- ridge.mod$lambda.min
+lambda_min
+
+ridge.pred = predict(ridge.mod, newx = x_test, s = lambda_min)
+
+sqrt(mean((ridge.pred - y_test)^2))
+```
+RMSE of the ridge regression is 1126.992.
+
+### Chapter 6 - 9d
+
+```{r}
+set.seed(1)
+
+lasso.mod = cv.glmnet(x_train, y_train, alpha = 1)
+lambda_min2 <- lasso.mod$lambda.min
+lambda_min2
+
+lasso.pred = predict(lasso.mod, newx = x_test, s = lambda_min2)
+
+sqrt(mean((lasso.pred - y_test)^2))
+
+lasso.mod2 = glmnet(model.matrix(Apps~., data = College), College[, "Apps"], alpha = 1)
+
+lasso_coef = predict(lasso.mod2, s = lambda_min2, type = "coefficients")
+
+lasso_coef
+```
+RMSE of the lasso regression is 1088.011.
+The non-zero coefficients are PrivateYes, Accept, Top10perc, Outstate, Room.Board, PhD, Terminal, perc.alumni, Expend, and Grad.Rate.
+
+### Chapter 6 - 9e
+
+```{r}
+library(pls)
+set.seed(1)
+
+pcr.fit = pcr(Apps~., data = College_train, scale = TRUE, validation = "CV")
+
+par(mfrow = c(1,1))
+
+validationplot(pcr.fit, val.type = "RMSEP")
+
+summary(pcr.fit)
+
+pcr.pred = predict(pcr.fit, College_test, ncomp = 17)
+
+sqrt(mean((pcr.pred - y_test)^2))
+```
+Minimum RMSE for PCR occurred at M = 17, which produced an RMSE of 1051.
+
+### Chapter 6 - 9f
+
+```{r}
+set.seed(1)
+
+pls.fit = plsr(Apps~., data = College_train, scale = TRUE, validation = "CV")
+
+validationplot(pls.fit, val.type = "RMSEP")
+
+summary(pls.fit)
+
+pls.pred = predict(pls.fit, College_test, ncomp = 10)
+
+sqrt(mean((pls.pred - y_test)^2))
+```
+Minimum RMSE for PLS occurred at M = 10, which produced an RMSE of 1054.
+
+### Chapter 6 - 9g
+
+The RMSE of the least squares model was 1051. The RMSE of the ridge regression was 1127. The RMSE of the lasso regression was 1088. The RMSE of the PCR model was 1051. The RMSE of the PLS model was 1054. It seems that the least squares and the PCR models predicted the number of college applications the most accurately. However. there doesn't appear to be too much difference in the methods used.
+
+
+## Chapter 6 - 11
+
+### Chapter 6 - 11a
+
+```{r}
+rm(list = ls())
+
+set.seed(1)
+library(MASS)
+library(glmnet)
+library(leaps)
+
+predict.regsubsets = function(object, newdata, id, ...) {
+  form = as.formula(object$call[[2]])
+  mat = model.matrix(form, newdata)
+  coefi = coef(object, id = id)
+  xvars = names(coefi)
+  mat[, names(coefi)] %*% coefi
+}
+
+k = 10
+folds = sample(1:k, nrow(Boston), replace = TRUE)
+cv.errors = matrix(NA, k, 13, dimnames = list(NULL, paste(1:13)))
+for (j in 1:k) {
+  best.fit=regsubsets(crim~.,data = Boston [folds != j,], nvmax = 13)
+  for(i in 1:13) {
+    pred = predict(best.fit,Boston[folds == j,],id = i)
+    cv.errors[j,i] = mean( (Boston$crim[folds == j]-pred)^2)
+  }
+}
+rmse.cv = sqrt(apply(cv.errors, 2, mean))
+plot(rmse.cv, type = "b")
+
+a <- which.min(rmse.cv)
+rmse.cv[a]
+
+x = model.matrix(crim~. -1, data = Boston)
+y = Boston$crim
+cv.lasso = cv.glmnet(x, y, type.measure = "mse")
+plot(cv.lasso)
+
+coef(cv.lasso)
+
+lasso.min = cv.lasso$lambda.min
+lasso.min
+
+sqrt(cv.lasso$cvm[cv.lasso$lambda == cv.lasso$lambda.1se])
+
+cv.ridge = cv.glmnet(x, y, type.measure = "mse", alpha = 0)
+plot(cv.ridge)
+
+coef(cv.ridge)
+
+sqrt(cv.ridge$cvm[cv.ridge$lambda == cv.ridge$lambda.1se])
+
+library(pls)
+
+pcr.fit = pcr(crim ~ ., data = Boston, scale = TRUE, validation = "CV")
+summary(pcr.fit)
+
+validationplot(pcr.fit, val.type = "RMSEP")
+```
+Best subset selection produced an RMSE of 6.52
+Lasso regression produced an RMSE of 7.54.
+Ridge regression produced an RMSE of 7.595.
+13 component PCR fit has the lowest RMSE.
+
+### Chapter 6 - 11b
+
+I would recommend the best subset selection as it gave the lowest RMSE.
+
+### Chapter 6 - 11c
+
+The best subset selection does include all variables in the data set.
+
+## Chapter 8 - 8
+
+### Chapter 8 - 8a
+
+```{r}
+rm(list = ls())
+
+library(ISLR)
+attach(Carseats)
+set.seed(1)
+
+train = sample(dim(Carseats)[1], 0.8 * dim(Carseats)[1])
+Carseats_train = Carseats[train,]
+Carseats_test = Carseats[-train,]
+```
+
+### Chapter 8 - 8b
+
+```{r}
+library(tree)
+
+tree_carseats = tree(Sales~., data = Carseats_train)
+
+summary(tree_carseats)
+
+plot(tree_carseats)
+text(tree_carseats, pretty = 0)
+
+pred_carseats = predict(tree_carseats, Carseats_test)
+mean((Carseats_test$Sales - pred_carseats)^2)
+```
+The test MSE is approximately 4.94.
+
+### Chapter 8 - 8c
+
+```{r}
+cv.carseats = cv.tree(tree_carseats, FUN = prune.tree)
+par(mfrow = c(1,2))
+plot(cv.carseats$size, cv.carseats$dev, type = "b")
+plot(cv.carseats$k, cv.carseats$dev, type = "b")
+
+prune_carseats = prune.tree(tree_carseats, best = 16)
+par(mfrow = c(1,1))
+plot(prune_carseats)
+text(prune_carseats, pretty = 0)
+
+pred_pruned = predict(prune_carseats, Carseats_test)
+mean((Carseats_test$Sales - pred_pruned)^2)
+```
+Pruning the tree does not affect the RMSE very much as it is still approximately 4.94.
+
+### Chapter 8 - 8d
+
+```{r}
+library(randomForest)
+
+bag_carseats = randomForest(Sales~., data = Carseats_train, mtry = 10, ntree = 500, importance = TRUE)
+bag_pred = predict(bag_carseats, Carseats_test)
+mean((Carseats_test$Sales - bag_pred)^2)
+importance(bag_carseats)
+```
+The bagging RMSE is 2.95, while the most important factors to Sales are ShelveLoc, Price, and CompPrice.
+
+### Chapter 8 - 8e
+
+```{r}
+rf_carseats = randomForest(Sales~., data = Carseats_train, mtry = 6, ntree = 500, importance = TRUE)
+rf_pred = predict(rf_carseats, Carseats_test)
+mean((Carseats_test$Sales - rf_pred)^2)
+importance(rf_carseats)
+```
+The random forest RMSE is 2.84 for m = 6. The most important factors to Sales are ShelveLoc, Price, and CompPrice.
+
+
+## Chapter 8 - 11
+
+### Chapter 8 - 11a
+
+```{r}
+rm(list = ls())
+library(ISLR)
+
+train = 1:1000
+Caravan$Purchase = ifelse(Caravan$Purchase == "Yes", 1, 0)
+Caravan_train = Caravan[train,]
+Caravan_test = Caravan[-train,]
+```
+
+### Chapter 8 - 11b
+
+```{r}
+library(gbm)
+set.seed(1)
+boost.caravan = gbm(Purchase~., data = Caravan_train, n.trees = 1000, shrinkage = 0.01, distribution = "bernoulli")
+summary(boost.caravan)
+```
+The most important variables are PPERSAUT, MKOOPKLA, and MOPLHOOG.
+
+### Chapter 8 - 11c
+
+```{r}
+boost_prob = predict(boost.caravan, Caravan_test, n.trees = 1000, type = "response")
+boost_pred = ifelse(boost_prob > 0.2, 1, 0)
+table(Caravan_test$Purchase, boost_pred)
+
+33 / (33+123)
+
+glm.caravan = glm(Purchase~., data = Caravan_train, family = binomial)
+
+glm_prob = predict(glm.caravan, Caravan_test, type = "response")
+
+glm_pred = ifelse(glm_prob > 0.2, 1, 0)
+table(Caravan_test$Purchase, glm_pred)
+
+58 / (350 + 58)
+```
+Boosting predicts a correct purchase only 21.15% of the time.
+Logistic regression predicts a correct purchase only 14.22% of the time. This is lower than boosting prediction.
+
+## Question 1.1
+
+```{r}
+BeautyData <- read.csv("BeautyData.csv")
+
+pairs(BeautyData)
+
+cor(BeautyData)
+
+set.seed(1)
+
+train = sample(1:nrow(BeautyData), 0.8 * nrow(BeautyData))
+BeautyTrain = BeautyData[train,]
+BeautyTest = BeautyData[-train,]
+
+lm.fit = lm(CourseEvals~., data = BeautyTrain)
+
+lm.pred = predict(lm.fit, BeautyTest)
+
+sqrt(mean(lm.pred - BeautyTest$CourseEvals)^2)
+
+summary(lm.fit)
+
+library(tree)
+library(gbm)
+
+boost.beauty = gbm(CourseEvals~., data = BeautyData[train,], distribution = "gaussian", n.trees = 100, interaction.depth = 4)
+
+summary(boost.beauty)
+```
+Beauty Score has a significant effect on course evaluation. From the boosting model, BeautyScore has a relative influence of approximately 68% on the course evaluation. However, according to the multi-linear model, almost all variables are statistically significant on the course evaluation, with the exception of tenure track. We can say that Beauty score, gender, lower division class, and native language all have an effect on course evaluation.
+
+## Question 1.2
+
+I believe what Dr. Hamermesh is implying is that there really is no general consensus on the relationship between course evaluation and beauty. There are so many more factors that apply into something as simple as a course evaluation. Certain other factors include how well the professor teaches, the mood of the students, how students perform in the class, and many other minute details. It is unwise to simply assume that a more beautiful professor would get higher course evaluations and vice versa.
+
+## Question 2.1
+
+```{r}
+rm(list = ls())
+
+Housing <- read.csv("MidCity.csv")
+
+set.seed(1)
+
+Housing$Brick = as.numeric(as.factor(Housing$Brick))
+Housing$Nbhd = as.factor(Housing$Nbhd)
+
+
+train = sample(1:nrow(Housing), 0.8 * nrow(Housing))
+
+Housing_train = Housing[train,]
+Housing_test = Housing[-train,]
+
+lm.fit = lm(Price~.-Home, data = Housing_train)
+
+lm.pred = predict(lm.fit, Housing_test)
+
+summary(lm.fit)
+
+confint(lm.fit)
+```
+According to the confidence interval, there is a 95% chance of a price premium between $10819 and $20302 if a house is made of brick.
+
+## Question 2.2
+
+There does seem to be a premium for houses located in neighborhood 3 as seen in the confidence interval. There is a 95% chance of a price premium between $14334 and $29131 for houses located in neighborhood 3.
+
+## Question 2.3
+
+```{r}
+lm.fit2 = lm(Price~as.factor(Nbhd):Brick + Nbhd + Offers + SqFt + Brick + Bedrooms + Bathrooms, data = Housing_train)
+
+summary(lm.fit2)
+
+confint(lm.fit2)
+```
+According to the second confidence interval which applied a filter for brick homes in the neighborhoods, there does appear to be a price premium for brick homes in neighborhood 3. There is a 95% chance of a price premium between $6519 and $30780 for brick homes located in neighborhood 3.
+
+## Question 2.4
+
+For the sake of prediction, it is possible that we could combine neighborhoods 1 and 2 into a single neighborhood. This might make it easier to predict prices in these neighborhoods while also eliminating some noise.
+
+## Question 3.1
+
+There are a multitude of factors that can affect crime in a city. As seen in the Boston data set, there were 14 total factors, and we ran analyses using crime rate as a predictor. The number of police in a certain area is simply not enough to indicate crime as there are other factors to account for. Such factors include: median income of households, tax rates, youth concentration, socioeconomic conditions, and many more.
+
+## Question 3.2
+
+UPenn researchers were able to isolate this effect by accounting for the High Alert level in D.C. They deduced that the number of crimes was not dependent on the number of police, but based off of the High Alert level and METRO ridership. 
+
+## Question 3.3
+
+The researchers used METRO ridership as a control to determine if that was affected by an increase or decrease in crime. They were also attempting to test the significance of METRO ridership on crime decrease.
+
+## Question 3.4
+
+The researchers are attempting to estimate the decrease in crime based on High Alert in District 1, High Alert in all other districts, and METRO Ridership. It seems that High Alert in District 1 and METRO ridership are both statistically significant, but High Alert in District 1 is more significant due to it being significant at the 1% level, while METRO ridership is only significant at the 5% level.
+
+## Question 5
+
+For the predictive modeling project, I worked with Suchit Das on implementing the univariate analysis of our prediction. We then worked on the step-wise regression together and did our best to understand the code and explain it to each other. I also contributed to the PowerPoint presentation by adding the corresponding slides and formatting it to make it aesthetically pleasing. I also contributed to the write-up report in Google Docs by adding the univariate analysis and the step-wise regressions.
